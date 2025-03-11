@@ -61,12 +61,12 @@ def main(args):
     if args.algo == "ppo":  # PPO
         agent = PPO(env, state_dim, args.hidden_dim, action_dim, args.actor_lr, args.critic_lr, 
                 args.lmbda, args.epochs, args.eps, args.gamma, args.num_steps, args.device)
-
+        return_list = utils.train_on_policy_agent(env, agent, args.num_episodes)
     elif args.algo == "grpo": # GRPO      
-        agent = GRPO(state_dim, args.hidden_dim, action_dim, args.actor_lr, 
+        agent = GRPO(env, state_dim, args.hidden_dim, action_dim, args.actor_lr, 
                 args.lmbda, args.epochs, args.eps, args.gamma, args.num_steps, args.device)
-        
-    return_list = utils.train_on_policy_agent(env, agent, args.num_episodes)
+        return_list = utils.train_grpo_agent(env, agent, args.num_episodes)
+
     agent.save_model("ppo_model", args.env_name)
 
 if __name__ == "__main__":
