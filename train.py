@@ -48,8 +48,15 @@ def main(args):
     if isinstance(env.action_space, (spaces.Discrete, spaces.MultiDiscrete)):
         action_dim = env.action_space[0].n
     else:
-        action_dim = env.action_space.shape[1]
-    state_dim = env.observation_space.shape[1]
+        try:
+            action_dim = env.action_space.shape[1]
+        except:
+            action_dim = 1
+    
+    try:
+        state_dim = env.observation_space.shape[1]
+    except:
+        state_dim = 1
 
     if args.algo_choice == 0:  # PPO
         agent = PPO(env, state_dim, args.hidden_dim, action_dim, args.actor_lr, args.critic_lr, 
