@@ -67,6 +67,7 @@ class PPO:
 
         # 计算优势函数
         advantage = utils.compute_advantage(self.gamma, self.lmbda, td_delta.cpu(), dones.cpu().detach().numpy()).to(self.device)
+        print(advantage.shape)
         if isinstance(self.env.action_space, (spaces.Discrete, spaces.MultiDiscrete)):
             old_log_probs = torch.log(self.actor(states).gather(-1, actions)).detach()
         else:

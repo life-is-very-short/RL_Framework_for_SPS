@@ -59,11 +59,9 @@ class GRPO:
         termination = torch.tensor(transition_dict['termination'], dtype=torch.float).unsqueeze(dim=-1).to(self.device)
         trucation = torch.tensor(transition_dict['trucation'], dtype=torch.float).unsqueeze(dim=-1).to(self.device)
         dones = termination 
-        td_target = rewards + self.gamma * self.critic(next_states) * (1 - dones)
-        td_delta = td_target - self.critic(states)
 
         # 计算优势函数
-        advantage = utils.compute_advantage(self.gamma, self.lmbda, td_delta.cpu(), dones.cpu().detach().numpy()).to(self.device)
+        advantage = utils.compute_reward_advantage(self.gamma, self.lmbda, rewards.cpu()).to(self.device)
         if isinstance(self.env.action_space, (spaces.Discrete, spaces.MultiDiscrete)):
             old_log_probs = torch.log(self.actor(states).gather(-1, actions)).detach()
         else:
@@ -84,14 +82,10 @@ class GRPO:
             surr2 = torch.clamp(ratio, 1 - self.eps, 1 + self.eps) * advantage  # 截断
 
             actor_loss = torch.mean(-torch.min(surr1, surr2))  # PPO损失函数
-            critic_loss = torch.mean(F.mse_loss(self.critic(states), td_target.detach()))  # TD error
 
             self.actor_optimizer.zero_grad()
-            self.critic_optimizer.zero_grad()
             actor_loss.backward()
-            critic_loss.backward()
             self.actor_optimizer.step()
-            self.critic_optimizer.step()
     
     def save_model(self, path, env_name):
         torch.save(self.actor.state_dict(), '{}/actor_{}.pth'.format(path, env_name))

@@ -31,6 +31,11 @@ def compute_advantage(gamma, lmbda, td_delta, done):
     advantage_list.reverse()
     return torch.tensor(advantage_list, dtype=torch.float)
 
+def compute_reward_advantage(gamma, lmbda, rewards):
+    r_std = torch.std(rewards)
+    print(r_std.shape)
+    exit(0)
+
 def train_on_policy_agent(env, agent, num_episodes):
     return_list = []
     for i in range(10):

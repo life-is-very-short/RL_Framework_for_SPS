@@ -36,7 +36,7 @@ def parse_args():
                         help = "number of environments")
     parser.add_argument("--num_steps", type = int, default = 512, 
                         help = "number of steps")
-    parser.add_argument("--algo_choice", type = int, default = 0, 
+    parser.add_argument("--algo", type = str, default = "ppo", 
                         help = "choose ppo or grpo")
        
     args = parser.parse_args()
@@ -58,11 +58,11 @@ def main(args):
     except:
         state_dim = 1
 
-    if args.algo_choice == 0:  # PPO
+    if args.algo == "ppo":  # PPO
         agent = PPO(env, state_dim, args.hidden_dim, action_dim, args.actor_lr, args.critic_lr, 
                 args.lmbda, args.epochs, args.eps, args.gamma, args.num_steps, args.device)
 
-    elif args.algo_choice == 1: # GRPO      
+    elif args.algo == "grpo": # GRPO      
         agent = GRPO(state_dim, args.hidden_dim, action_dim, args.actor_lr, 
                 args.lmbda, args.epochs, args.eps, args.gamma, args.num_steps, args.device)
         
