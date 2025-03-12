@@ -29,7 +29,7 @@ def compute_advantage(gamma, lmbda, td_delta, done):
         advantage = gamma * lmbda * (1 - done[::-1][i]) * advantage + delta
         advantage_list.append(advantage)
     advantage_list.reverse()
-    return torch.tensor(advantage_list, dtype=torch.float)
+    return torch.tensor(np.array(advantage_list), dtype=torch.float)
 
 def compute_reward_advantage(rewards):
     r_mean = torch.mean(rewards, dim=0)

@@ -50,14 +50,14 @@ class GRPO:
             return action.cpu().detach().numpy()
         
     def update(self, transition_dict): 
-        states = torch.tensor(transition_dict['states'], dtype=torch.float).to(self.device)
-        actions = torch.tensor(transition_dict['actions']).to(self.device)
+        states = torch.tensor(np.array(transition_dict['states']), dtype=torch.float).to(self.device)
+        actions = torch.tensor(np.array(transition_dict['actions'])).to(self.device)
         if isinstance(self.env.action_space, (spaces.Discrete, spaces.MultiDiscrete)):
             actions = actions.unsqueeze(dim=-1)
-        rewards = torch.tensor(transition_dict['rewards'], dtype=torch.float).unsqueeze(dim=-1).to(self.device)
-        next_states = torch.tensor(transition_dict['next_states'], dtype=torch.float).to(self.device)
-        termination = torch.tensor(transition_dict['termination'], dtype=torch.float).unsqueeze(dim=-1).to(self.device)
-        trucation = torch.tensor(transition_dict['trucation'], dtype=torch.float).unsqueeze(dim=-1).to(self.device)
+        rewards = torch.tensor(np.array(transition_dict['rewards']), dtype=torch.float).unsqueeze(dim=-1).to(self.device)
+        next_states = torch.tensor(np.array(transition_dict['next_states']), dtype=torch.float).to(self.device)
+        termination = torch.tensor(np.array(transition_dict['termination']), dtype=torch.float).unsqueeze(dim=-1).to(self.device)
+        trucation = torch.tensor(np.array(transition_dict['trucation']), dtype=torch.float).unsqueeze(dim=-1).to(self.device)
         dones = termination 
 
         # 计算优势函数
