@@ -2,6 +2,7 @@ import os
 import ale_py
 import argparse
 import torch
+import time
 import gymnasium as gym
 import numpy as np
 import matplotlib.pyplot as plt
@@ -40,6 +41,10 @@ def parse_args():
                         help = "number of steps")
     parser.add_argument("--algo", type = str, default = "ppo", 
                         help = "choose ppo or grpo")
+    parser.add_argument("--train_mode", type = int, default = 1, 
+                        help = "是否训练模式")
+    parser.add_argument("--render_mode", type = str, default = "human", 
+                        help = "env中的render模式，human为demo展示，rgb_array为生成gif")
        
     args = parser.parse_args()
     return args
@@ -61,12 +66,35 @@ def main(args):
         state_dim = 1
 
     if args.algo == "ppo":  # PPO
-        agent = PPO(env, state_dim, args.hidden_dim, action_dim, args.actor_lr, args.critic_lr, 
-                args.lmbda, args.epochs, args.eps, args.gamma, args.num_steps, args.device)
+        agent = PPO(
+            env, 
+            state_dim, 
+            args.hidden_dim, 
+            action_dim, 
+            args.actor_lr, 
+            args.critic_lr, 
+            args.lmbda, 
+            args.epochs, 
+            args.eps, 
+            args.gamma, 
+            args.num_steps, 
+            args.device
+            )
 
     elif args.algo == "grpo": # GRPO      
-        agent = GRPO(env, state_dim, args.hidden_dim, action_dim, args.actor_lr, 
-                args.lmbda, args.epochs, args.eps, args.gamma, args.num_steps, args.device)
+        agent = GRPO(
+            env, 
+            state_dim, 
+            args.hidden_dim, 
+            action_dim, 
+            args.actor_lr, 
+            args.lmbda, 
+            args.epochs, 
+            args.eps, 
+            args.gamma, 
+            args.num_steps, 
+            args.device
+            )
     
     return_list = utils.train_on_policy_agent(env, agent, args.num_episodes)
     agent.save_model("{}_model".format(args.algo), args.env_name)
@@ -78,7 +106,82 @@ def main(args):
     plt.title('PPO on {}'.format(args.env_name))
     plt.show()
 
+def test(args):
+    env = gym.make_vec(args.env_name, args.num_envs, render_mode = args.render_mode)
+    torch.manual_seed(0)
+    if isinstance(env.action_space, (spaces.Discrete, spaces.MultiDiscrete)):
+        action_dim = env.action_space[0].n
+    else:
+        try:
+            action_dim = env.action_space.shape[1]
+        except:
+            action_dim = 1
+    
+    try:
+        state_dim = env.observation_space.shape[1]
+    except:
+        state_dim = 1
+
+    if args.algo == "ppo":  # PPO
+        agent = PPO(
+            env, 
+            state_dim, 
+            args.hidden_dim, 
+            action_dim, 
+            args.actor_lr, 
+            args.critic_lr, 
+            args.lmbda, 
+            args.epochs, 
+            args.eps, 
+            args.gamma, 
+            args.num_steps, 
+            args.device
+            )
+
+    elif args.algo == "grpo": # GRPO      
+        agent = GRPO(
+            env, 
+            state_dim, 
+            args.hidden_dim, 
+            action_dim, 
+            args.actor_lr, 
+            args.lmbda, 
+            args.epochs, 
+            args.eps, 
+            args.gamma, 
+            args.num_steps, 
+            args.device
+            )
+        
+    agent.load_model("{}_model".format(args.algo), args.env_name)
+
+    frames = []
+    if args.render_mode == "rgb_array":
+        for i_episode in range(2):
+            state, _ = env.reset()
+            for _ in range(150):
+                frames.append(env.render())
+                action = agent.take_action(state)
+                next_state, reward, done, _, _ = env.step(action)
+                state = next_state
+        env.close()
+        utils.display_frames_as_gif(frames, args.env_name)
+    elif args.render_mode == "human":
+        while True:
+            state, _ = env.reset()
+            for _ in range(500):
+                env.render()
+                action = agent.take_action(state)
+                next_state, reward, done, _, _ = env.step(action)
+                state = next_state
+                
+            time.sleep(1)
+
+
 if __name__ == "__main__":
     args = parse_args()
-    main(args)
+    if args.train_mode == True:
+        main(args)
+    test(args)
+            
     

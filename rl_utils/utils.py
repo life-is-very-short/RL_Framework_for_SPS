@@ -3,7 +3,9 @@ import numpy as np
 import torch.nn as nn
 import collections
 import random  
+import matplotlib.pyplot as plt
 
+from matplotlib import animation
 from tqdm import tqdm
 
 class ReplayBuffer:
@@ -65,7 +67,7 @@ def train_on_policy_agent(env, agent, num_episodes):
                     n_step += 1
                     episode_return += reward
 
-                return_list.append(episode_return)
+                return_list.append(episode_return.mean())
                 agent.update(transition_dict)
                 if (i_episode + 1) % 10 == 0:
                     pbar.set_postfix({'episode': '%d' % (num_episodes / 10 * i + i_episode + 1),
@@ -98,3 +100,14 @@ def train_off_policy_agent(env, agent, num_episodes, replay_buffer, minimal_size
                                       'return': '%.3f' % np.mean(return_list[-10:])})
                 pbar.update(1)
     return return_list
+
+def display_frames_as_gif(frames, save_path):
+    patch = plt.imshow(frames[0][0])
+    plt.axis("off")
+
+    def animate(i):
+        patch.set_data(frames[i][0])
+
+    anim = animation.FuncAnimation(plt.gcf(), animate, frames = len(frames), interval = 5)
+    anim.save("assets/{}_result.gif".format(save_path), writer="pillow", fps = 30)
+
