@@ -31,7 +31,7 @@ def compute_advantage(gamma, lmbda, td_delta, done):
     advantage_list.reverse()
     return torch.tensor(advantage_list, dtype=torch.float)
 
-def compute_reward_advantage(gamma, lmbda, rewards):
+def compute_reward_advantage(rewards):
     r_mean = torch.mean(rewards, dim=0)
     r_std = torch.std(rewards, dim=0) + 0.0001
     rewards = (rewards - r_mean) / r_std

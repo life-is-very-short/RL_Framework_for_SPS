@@ -61,7 +61,7 @@ class GRPO:
         dones = termination 
 
         # 计算优势函数
-        advantage = utils.compute_reward_advantage(self.gamma, self.lmbda, rewards).to(self.device)
+        advantage = utils.compute_reward_advantage(rewards).to(self.device)
         if isinstance(self.env.action_space, (spaces.Discrete, spaces.MultiDiscrete)):
             old_log_probs = torch.log(self.actor(states).gather(-1, actions)).detach()
         else:
