@@ -3,6 +3,8 @@ import ale_py
 import argparse
 import torch
 import gymnasium as gym
+import numpy as np
+import matplotlib.pyplot as plt
 
 from gymnasium import spaces
 
@@ -16,7 +18,7 @@ def parse_args():
                         help = "actor learning rate")
     parser.add_argument("--critic_lr", type = float, default = 1e-2, 
                         help = "critic learning rate")
-    parser.add_argument("--num_episodes", type = int, default = 500, 
+    parser.add_argument("--num_episodes", type = int, default = 5000, 
                         help = "number of episodes")
     parser.add_argument("--hidden_dim", type = int, default = 128, 
                         help = "hidden layer dimension")
@@ -34,7 +36,7 @@ def parse_args():
                         help = "environment name")
     parser.add_argument("--num_envs", type = int, default = 4, 
                         help = "number of environments")
-    parser.add_argument("--num_steps", type = int, default = 5000, 
+    parser.add_argument("--num_steps", type = int, default = 256, 
                         help = "number of steps")
     parser.add_argument("--algo", type = str, default = "ppo", 
                         help = "choose ppo or grpo")
@@ -67,7 +69,14 @@ def main(args):
                 args.lmbda, args.epochs, args.eps, args.gamma, args.num_steps, args.device)
     
     return_list = utils.train_on_policy_agent(env, agent, args.num_episodes)
-    agent.save_model("ppo_model", args.env_name)
+    agent.save_model("{}_model".format(args.algo), args.env_name)
+
+    episodes_list = list(range(len(return_list)))
+    plt.plot(episodes_list, return_list)
+    plt.xlabel('Episodes')
+    plt.ylabel('Returns')
+    plt.title('PPO on {}'.format(args.env_name))
+    plt.show()
 
 if __name__ == "__main__":
     args = parse_args()
