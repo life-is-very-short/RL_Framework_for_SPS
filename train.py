@@ -51,7 +51,7 @@ def parse_args():
 
 def main(args):
     env = gym.make_vec(args.env_name, args.num_envs)
-    torch.manual_seed(0)
+    torch.manual_seed(234)
     if isinstance(env.action_space, (spaces.Discrete, spaces.MultiDiscrete)):
         action_dim = env.action_space[0].n
     else:

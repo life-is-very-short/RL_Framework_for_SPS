@@ -35,7 +35,7 @@ def compute_advantage(gamma, lmbda, td_delta, done):
 
 def compute_reward_advantage(rewards):
     r_mean = torch.mean(rewards, dim=0)
-    r_std = torch.std(rewards, dim=0) + 0.0001
+    r_std = torch.std(rewards, dim=0) + 0.00001
     rewards = (rewards - r_mean) / r_std
     rewards = rewards.cpu().detach().numpy()
     advantage_list = []
@@ -57,7 +57,7 @@ def train_on_policy_agent(env, agent, num_episodes):
             for i_episode in range(int(num_episodes / 10)):
                 episode_return = 0
                 transition_dict = {'states': [], 'actions': [], 'next_states': [], 'rewards': [], 'termination': [], 'trucation': []}
-                state, _ = env.reset(seed = i_episode)
+                state, _ = env.reset(seed = i_episode*23)
                 termination = False
                 trucation = False
                 n_step = 0
