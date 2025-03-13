@@ -88,8 +88,8 @@ class GRPO:
             self.actor_optimizer.step()
     
     def save_model(self, path, env_name):
-        torch.save(self.actor.state_dict(), '{}/actor_{}.pth'.format(path, env_name))
+        torch.save(self.actor.state_dict(), 'model/{}/actor_{}.pth'.format(path, env_name))
 
     def load_model(self, path, env_name):
-        self.actor.load_state_dict(torch.load('{}/actor_{}.pth'.format(path, env_name)))
+        self.actor.load_state_dict(torch.load('model/{}/actor_{}.pth'.format(path, env_name)))
         self.actor.eval()

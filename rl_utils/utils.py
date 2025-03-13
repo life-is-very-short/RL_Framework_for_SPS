@@ -37,7 +37,14 @@ def compute_reward_advantage(rewards):
     r_mean = torch.mean(rewards, dim=0)
     r_std = torch.std(rewards, dim=0) + 0.0001
     rewards = (rewards - r_mean) / r_std
-    return rewards
+    rewards = rewards.cpu().detach().numpy()
+    advantage_list = []
+    advantage = np.zeros_like(rewards[0])
+    for i, delta in enumerate(rewards[::-1]):
+        advantage = advantage + delta
+        advantage_list.append(advantage)
+    advantage_list.reverse()
+    return torch.tensor(np.array(advantage_list), dtype=torch.float)
 
 def compute_kl_divergence(ref_log_probs, log_probs):
     gamma = log_probs - ref_log_probs
@@ -101,7 +108,7 @@ def train_off_policy_agent(env, agent, num_episodes, replay_buffer, minimal_size
                 pbar.update(1)
     return return_list
 
-def display_frames_as_gif(frames, save_path):
+def display_frames_as_gif(frames, save_path, algo):
     patch = plt.imshow(frames[0][0])
     plt.axis("off")
 
@@ -109,5 +116,5 @@ def display_frames_as_gif(frames, save_path):
         patch.set_data(frames[i][0])
 
     anim = animation.FuncAnimation(plt.gcf(), animate, frames = len(frames), interval = 5)
-    anim.save("assets/{}_result.gif".format(save_path), writer="pillow", fps = 30)
+    anim.save("assets/{}_{}_result.gif".format(save_path, algo), writer="pillow", fps = 30)
 

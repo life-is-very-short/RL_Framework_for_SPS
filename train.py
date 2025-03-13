@@ -103,7 +103,7 @@ def main(args):
     plt.plot(episodes_list, return_list)
     plt.xlabel('Episodes')
     plt.ylabel('Returns')
-    plt.title('PPO on {}'.format(args.env_name))
+    plt.title('{} on {}'.format(args.algo, args.env_name))
     plt.show()
 
 def test(args):
@@ -165,7 +165,7 @@ def test(args):
                 next_state, reward, done, _, _ = env.step(action)
                 state = next_state
         env.close()
-        utils.display_frames_as_gif(frames, args.env_name)
+        utils.display_frames_as_gif(frames, args.env_name, args.algo)
     elif args.render_mode == "human":
         while True:
             state, _ = env.reset()

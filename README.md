@@ -14,9 +14,10 @@ python3 train.py --algo ppo
 
 ### Cart Pole
 
-
+<img width="280" src="assets/ppo_on_cartpole.png"/> <img width="280" src="assets/grpo_on_cartpole.png"/>
+<img width="280" src="assets/CartPole-v1_ppo_result.gif"/> <img width="280" src="assets/CartPole-v1_grpo_result.gif"/>
 
 ### Pendulum
 
-<img width="500" src="assets/ppo_on_pendulum.png"/>
-<img width="500" src="assets/Pendulum-v1_result.gif"/>
+<img width="280" src="assets/ppo_on_pendulum.png"/> <img width="280" src="assets/grpo_on_pendulum.png"/>
+<img width="280" src="assets/Pendulum-v1_ppo_result.gif"/> <img width="280" src="assets/Pendulum-v1_grpo_result.gif"/>
