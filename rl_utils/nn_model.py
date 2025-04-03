@@ -48,5 +48,3 @@ class PolicyNet_Continue(torch.nn.Module):
         mu = torch.tanh(self.mu(x)) * 2
         sigma = F.softplus(self.sigma(x)) + 0.00001
         return mu, sigma
-
-

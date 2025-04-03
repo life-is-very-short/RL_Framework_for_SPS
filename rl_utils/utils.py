@@ -50,6 +50,9 @@ def compute_kl_divergence(ref_log_probs, log_probs):
     gamma = log_probs - ref_log_probs
     return torch.exp(gamma)-gamma-1
 
+def compute_potential_reward():
+    pass
+
 def train_on_policy_agent(env, agent, num_episodes):
     return_list = []
     for i in range(10):
@@ -102,6 +105,38 @@ def train_off_policy_agent(env, agent, num_episodes, replay_buffer, minimal_size
                                            'dones': b_d}
                         agent.update(transition_dict)
                 return_list.append(episode_return)
+                if (i_episode + 1) % 10 == 0:
+                    pbar.set_postfix({'episode': '%d' % (num_episodes / 10 * i + i_episode + 1),
+                                      'return': '%.3f' % np.mean(return_list[-10:])})
+                pbar.update(1)
+    return return_list
+
+def train_potential_agent(env, agent, num_episodes):
+    return_list = []
+    for i in range(10):
+        with tqdm(total=int(num_episodes / 10), desc='Iteration %d' % i) as pbar:
+            for i_episode in range(int(num_episodes / 10)):
+                episode_return = 0
+                transition_dict = {'states': [], 'actions': [], 'next_states': [], 'rewards': [], 'termination': [], 'trucation': []}
+                state, _ = env.reset(seed = i_episode*23)
+                termination = False
+                trucation = False
+                n_step = 0
+                while n_step < agent.num_steps:
+                    action = agent.take_action(state)
+                    next_state, reward, termination, trucation, _ = env.step(action)
+                    transition_dict['states'].append(state)
+                    transition_dict['actions'].append(action)
+                    transition_dict['next_states'].append(next_state)
+                    transition_dict['rewards'].append(reward)
+                    transition_dict['termination'].append(termination)
+                    transition_dict['trucation'].append(trucation)
+                    state = next_state
+                    n_step += 1
+                    episode_return += reward
+
+                return_list.append(episode_return.mean())
+                agent.update(transition_dict)
                 if (i_episode + 1) % 10 == 0:
                     pbar.set_postfix({'episode': '%d' % (num_episodes / 10 * i + i_episode + 1),
                                       'return': '%.3f' % np.mean(return_list[-10:])})

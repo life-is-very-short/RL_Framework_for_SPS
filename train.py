@@ -37,7 +37,7 @@ def parse_args():
                         help = "environment name")
     parser.add_argument("--num_envs", type = int, default = 4, 
                         help = "number of environments")
-    parser.add_argument("--num_steps", type = int, default = 256, 
+    parser.add_argument("--num_steps", type = int, default = 2, 
                         help = "number of steps")
     parser.add_argument("--algo", type = str, default = "ppo", 
                         help = "choose ppo or grpo")

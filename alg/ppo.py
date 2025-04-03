@@ -62,9 +62,9 @@ class PPO:
         termination = torch.tensor(np.array(transition_dict['termination']), dtype=torch.float).unsqueeze(dim=-1).to(self.device)
         trucation = torch.tensor(np.array(transition_dict['trucation']), dtype=torch.float).unsqueeze(dim=-1).to(self.device)
         dones = termination 
+        print(dones.shape)
         td_target = rewards + self.gamma * self.critic(next_states) * (1 - dones)
         td_delta = td_target - self.critic(states)
-
         # 计算优势函数
         advantage = utils.compute_advantage(self.gamma, self.lmbda, td_delta.cpu(), dones.cpu().detach().numpy()).to(self.device)
         if isinstance(self.env.action_space, (spaces.Discrete, spaces.MultiDiscrete)):
@@ -73,7 +73,6 @@ class PPO:
             mu, sigma = self.actor(states)
             action_dis = torch.distributions.normal.Normal(mu, sigma)
             old_log_probs = action_dis.log_prob(actions).detach()
-        
         for _ in range(self.epochs):
             # 重要性采样比率
             if isinstance(self.env.action_space, (spaces.Discrete, spaces.MultiDiscrete)):
