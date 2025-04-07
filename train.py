@@ -11,6 +11,7 @@ from gymnasium import spaces
 
 from alg.ppo import PPO
 from alg.grpo import GRPO
+from alg.inter_potential import PARS
 from rl_utils import utils
 
 def parse_args():
@@ -65,39 +66,29 @@ def main(args):
     except:
         state_dim = 1
 
+    potential_agent = PARS(
+        env, state_dim, args.hidden_dim, args.critic_lr,
+        args.lmbda, args.epochs, args.eps, args.gamma, 
+        args.num_steps, args.device
+        )
+
     if args.algo == "ppo":  # PPO
         agent = PPO(
-            env, 
-            state_dim, 
-            args.hidden_dim, 
-            action_dim, 
-            args.actor_lr, 
-            args.critic_lr, 
-            args.lmbda, 
-            args.epochs, 
-            args.eps, 
-            args.gamma, 
-            args.num_steps, 
-            args.device
+            env, state_dim, args.hidden_dim, action_dim, 
+            args.actor_lr, args.critic_lr, args.lmbda, args.epochs, 
+            args.eps, args.gamma, args.num_steps, args.device
             )
 
     elif args.algo == "grpo": # GRPO      
         agent = GRPO(
-            env, 
-            state_dim, 
-            args.hidden_dim, 
-            action_dim, 
-            args.actor_lr, 
-            args.lmbda, 
-            args.epochs, 
-            args.eps, 
-            args.gamma, 
-            args.num_steps, 
-            args.device
+            env, state_dim, args.hidden_dim, action_dim, 
+            args.actor_lr, args.lmbda, args.epochs, 
+            args.eps, args.gamma, args.num_steps, args.device
             )
     
-    return_list = utils.train_on_policy_agent(env, agent, args.num_episodes)
+    return_list = utils.train_potential_agent(env, agent, potential_agent, args.num_episodes)
     agent.save_model("{}_model".format(args.algo), args.env_name)
+    potential_agent.save_model("{}_potential_model".format(args.algo), args.env_name)
 
     episodes_list = list(range(len(return_list)))
     plt.plot(episodes_list, return_list)
@@ -124,33 +115,16 @@ def test(args):
 
     if args.algo == "ppo":  # PPO
         agent = PPO(
-            env, 
-            state_dim, 
-            args.hidden_dim, 
-            action_dim, 
-            args.actor_lr, 
-            args.critic_lr, 
-            args.lmbda, 
-            args.epochs, 
-            args.eps, 
-            args.gamma, 
-            args.num_steps, 
-            args.device
+            env, state_dim, args.hidden_dim, action_dim, 
+            args.actor_lr, args.critic_lr, args.lmbda, args.epochs, 
+            args.eps, args.gamma, args.num_steps, args.device
             )
 
     elif args.algo == "grpo": # GRPO      
         agent = GRPO(
-            env, 
-            state_dim, 
-            args.hidden_dim, 
-            action_dim, 
-            args.actor_lr, 
-            args.lmbda, 
-            args.epochs, 
-            args.eps, 
-            args.gamma, 
-            args.num_steps, 
-            args.device
+            env, state_dim, args.hidden_dim, action_dim, 
+            args.actor_lr, args.lmbda, args.epochs, 
+            args.eps, args.gamma, args.num_steps, args.device
             )
         
     agent.load_model("{}_model".format(args.algo), args.env_name)

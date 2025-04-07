@@ -28,7 +28,8 @@ class ValueNet(torch.nn.Module):
 
     def forward(self, x):
         x = self.net(x)
-        return self.fc1(x)
+        x = self.fc1(x)
+        return F.relu(x)
     
 class PolicyNet_Continue(torch.nn.Module):
     def __init__(self, state_dim, hidden_dim, action_dim):
