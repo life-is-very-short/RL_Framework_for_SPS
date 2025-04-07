@@ -27,7 +27,7 @@ class PARS:
         '''
         self.env = env
         self.potential = ValueNet(state_dim, hidden_dim).to(device)
-        self.potential_optimizer = torch.optim.Adam(self.critic.parameters(), lr=critic_lr)
+        self.potential_optimizer = torch.optim.Adam(self.potential.parameters(), lr=critic_lr)
         self.gamma = gamma
         self.lmbda = lmbda
         self.epochs = epochs  # 一条序列的数据用来训练轮数
@@ -36,13 +36,16 @@ class PARS:
         self.device = device
 
     def reward_shaping(self, state, next_state, reward):
+        state = torch.tensor(state, dtype=torch.float).to(self.device)
+        next_state = torch.tensor(next_state, dtype=torch.float).to(self.device)
+        reward = torch.tensor(reward, dtype=torch.float).to(self.device)
         phi_s = self.potential(state)
         phi_ns = self.potential(next_state)
         # 计算潜在奖励
         potential_reward = phi_s - self.gamma * phi_ns
         # 计算真实奖励
-        shaped_reward = reward + potential_reward
-        return shaped_reward
+        shaped_reward = reward + potential_reward.view(-1)
+        return shaped_reward.cpu().detach().numpy()
 
 
     def update(self, transition_dict): 

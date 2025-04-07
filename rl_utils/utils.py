@@ -127,21 +127,21 @@ def train_potential_agent(env, agent, potential_agent, num_episodes):
                 while n_step < agent.num_steps:
                     action = agent.take_action(state)
                     next_state, real_reward, termination, trucation, _ = env.step(action)
-                    reward = potential_agent.reward_shaping(state, next_state, reward)
+                    reward = potential_agent.reward_shaping(state, next_state, real_reward)
                     transition_dict['states'].append(state)
                     transition_dict['actions'].append(action)
                     transition_dict['next_states'].append(next_state)
                     transition_dict['rewards'].append(reward)
-                    transition_dict['real_ewards'].append(real_reward)
+                    transition_dict['real_rewards'].append(real_reward)
                     transition_dict['termination'].append(termination)
                     transition_dict['trucation'].append(trucation)
                     state = next_state
                     n_step += 1
-                    episode_return += reward
+                    episode_return += real_reward
 
                 return_list.append(episode_return.mean())
                 agent.update(transition_dict)
-                potential_agent.update(transition_dict)
+                #potential_agent.update(transition_dict)
                 if (i_episode + 1) % 10 == 0:
                     pbar.set_postfix({'episode': '%d' % (num_episodes / 10 * i + i_episode + 1),
                                       'return': '%.3f' % np.mean(return_list[-10:])})

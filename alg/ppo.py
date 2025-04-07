@@ -57,12 +57,11 @@ class PPO:
         actions = torch.tensor(np.array(transition_dict['actions'])).to(self.device)
         if isinstance(self.env.action_space, (spaces.Discrete, spaces.MultiDiscrete)):
             actions = actions.unsqueeze(dim=-1)
-        rewards = torch.tensor(np.array(transition_dict['rewards']), dtype=torch.float).unsqueeze(dim=-1).to(self.device)
+        rewards = torch.tensor(np.array(transition_dict['real_rewards']), dtype=torch.float).unsqueeze(dim=-1).to(self.device)
         next_states = torch.tensor(np.array(transition_dict['next_states']), dtype=torch.float).to(self.device)
         termination = torch.tensor(np.array(transition_dict['termination']), dtype=torch.float).unsqueeze(dim=-1).to(self.device)
         trucation = torch.tensor(np.array(transition_dict['trucation']), dtype=torch.float).unsqueeze(dim=-1).to(self.device)
         dones = termination 
-        print(dones.shape)
         td_target = rewards + self.gamma * self.critic(next_states) * (1 - dones)
         td_delta = td_target - self.critic(states)
         # 计算优势函数
