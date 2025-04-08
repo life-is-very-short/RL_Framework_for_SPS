@@ -38,7 +38,7 @@ def parse_args():
                         help = "environment name")
     parser.add_argument("--num_envs", type = int, default = 4, 
                         help = "number of environments")
-    parser.add_argument("--num_steps", type = int, default = 2, 
+    parser.add_argument("--num_steps", type = int, default = 256, 
                         help = "number of steps")
     parser.add_argument("--algo", type = str, default = "ppo", 
                         help = "choose ppo or grpo")
@@ -46,6 +46,8 @@ def parse_args():
                         help = "是否训练模式")
     parser.add_argument("--render_mode", type = str, default = "human", 
                         help = "env中的render模式，human为demo展示，rgb_array为生成gif")
+    parser.add_argument("--reward_mode", type = str, default = "shaping",
+                        help = "reward shaping or not") 
        
     args = parser.parse_args()
     return args
@@ -66,11 +68,12 @@ def main(args):
     except:
         state_dim = 1
 
-    potential_agent = PARS(
-        env, state_dim, args.hidden_dim, args.critic_lr,
-        args.lmbda, args.epochs, args.eps, args.gamma, 
-        args.num_steps, args.device
-        )
+    if args.reward_mode == "shaping":
+        potential_agent = PARS(
+            env, state_dim, args.hidden_dim, args.critic_lr,
+            args.lmbda, args.epochs, args.eps, args.gamma, 
+            args.num_steps, args.device
+            )
 
     if args.algo == "ppo":  # PPO
         agent = PPO(
@@ -86,9 +89,13 @@ def main(args):
             args.eps, args.gamma, args.num_steps, args.device
             )
     
-    return_list = utils.train_potential_agent(env, agent, potential_agent, args.num_episodes)
-    agent.save_model("{}_model".format(args.algo), args.env_name)
-    potential_agent.save_model("{}_potential_model".format(args.algo), args.env_name)
+    if args.reward_mode == "shaping":
+        return_list = utils.train_potential_agent(env, agent, potential_agent, args.num_episodes)
+        potential_agent.save_model("{}_potential_model".format(args.algo), args.env_name)
+        agent.save_model("{}_potential_model".format(args.algo), args.env_name)
+    else:
+        return_list = utils.train_on_policy_agent(env, agent, args.num_episodes)
+        agent.save_model("{}_model".format(args.algo), args.env_name)
 
     episodes_list = list(range(len(return_list)))
     plt.plot(episodes_list, return_list)
@@ -126,8 +133,10 @@ def test(args):
             args.actor_lr, args.lmbda, args.epochs, 
             args.eps, args.gamma, args.num_steps, args.device
             )
-        
-    agent.load_model("{}_model".format(args.algo), args.env_name)
+    if args.reward_mode == "shaping":
+        agent.load_model("{}_potential_model".format(args.algo), args.env_name)
+    else:
+        agent.load_model("{}_model".format(args.algo), args.env_name)
 
     frames = []
     if args.render_mode == "rgb_array":
@@ -139,7 +148,7 @@ def test(args):
                 next_state, reward, done, _, _ = env.step(action)
                 state = next_state
         env.close()
-        utils.display_frames_as_gif(frames, args.env_name, args.algo)
+        utils.display_frames_as_gif(frames, args.env_name, args.algo, args.reward_mode)
     elif args.render_mode == "human":
         while True:
             state, _ = env.reset()
@@ -149,7 +158,6 @@ def test(args):
                 next_state, reward, done, _, _ = env.step(action)
                 state = next_state
                 
-            time.sleep(1)
 
 
 if __name__ == "__main__":

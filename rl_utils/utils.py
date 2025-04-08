@@ -59,7 +59,7 @@ def train_on_policy_agent(env, agent, num_episodes):
         with tqdm(total=int(num_episodes / 10), desc='Iteration %d' % i) as pbar:
             for i_episode in range(int(num_episodes / 10)):
                 episode_return = 0
-                transition_dict = {'states': [], 'actions': [], 'next_states': [], 'rewards': [], 'termination': [], 'trucation': []}
+                transition_dict = {'states': [], 'actions': [], 'next_states': [], 'real_rewards': [], 'termination': [], 'trucation': []}
                 state, _ = env.reset(seed = i_episode*23)
                 termination = False
                 trucation = False
@@ -70,7 +70,7 @@ def train_on_policy_agent(env, agent, num_episodes):
                     transition_dict['states'].append(state)
                     transition_dict['actions'].append(action)
                     transition_dict['next_states'].append(next_state)
-                    transition_dict['rewards'].append(reward)
+                    transition_dict['real_rewards'].append(reward)
                     transition_dict['termination'].append(termination)
                     transition_dict['trucation'].append(trucation)
                     state = next_state
@@ -120,7 +120,7 @@ def train_potential_agent(env, agent, potential_agent, num_episodes):
                 transition_dict = {'states': [], 'actions': [], 'next_states': [], 
                                    'rewards': [], 'termination': [], 'trucation': [],
                                    'real_rewards': []}
-                state, _ = env.reset(seed = i_episode*23)
+                state, _ = env.reset(seed = i_episode)
                 termination = False
                 trucation = False
                 n_step = 0
@@ -141,14 +141,14 @@ def train_potential_agent(env, agent, potential_agent, num_episodes):
 
                 return_list.append(episode_return.mean())
                 agent.update(transition_dict)
-                #potential_agent.update(transition_dict)
+                potential_agent.update(transition_dict)
                 if (i_episode + 1) % 10 == 0:
                     pbar.set_postfix({'episode': '%d' % (num_episodes / 10 * i + i_episode + 1),
                                       'return': '%.3f' % np.mean(return_list[-10:])})
                 pbar.update(1)
     return return_list
 
-def display_frames_as_gif(frames, save_path, algo):
+def display_frames_as_gif(frames, save_path, algo, reward_mode):
     patch = plt.imshow(frames[0][0])
     plt.axis("off")
 
@@ -156,5 +156,5 @@ def display_frames_as_gif(frames, save_path, algo):
         patch.set_data(frames[i][0])
 
     anim = animation.FuncAnimation(plt.gcf(), animate, frames = len(frames), interval = 5)
-    anim.save("assets/{}_{}_result.gif".format(save_path, algo), writer="pillow", fps = 30)
+    anim.save("assets/{}_{}_{}.gif".format(save_path, algo, reward_mode), writer="pillow", fps = 30)
 
